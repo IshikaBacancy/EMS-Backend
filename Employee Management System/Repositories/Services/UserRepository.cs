@@ -54,6 +54,14 @@ namespace Employee_Management_System.Repositories.Services
             return await _context.Users.AnyAsync(u => u.Email == email);
         }
         
+        public async Task<int?> GetDepartmentIdByUserIdAsync(int userId)
+        {
+            return await _context.Employees
+                .Where(e => e.UserId == userId)
+                .Select(e => e.DepartmentId)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task AddUserAdminAsync(User user)
         {
             await _context.Users.AddAsync(user);
@@ -67,15 +75,7 @@ namespace Employee_Management_System.Repositories.Services
                 .SingleOrDefaultAsync();
         }
 
-        public async Task AddUserEmployeeAsync(Employee employee)
-        {
-            await _context.Employees.AddAsync(employee);
-            await _context.SaveChangesAsync();
-        }
-
-
-
-
+       
         public async Task<string> ActivateUserEmployeeAsync(User user)
         {
             try
@@ -107,6 +107,52 @@ namespace Employee_Management_System.Repositories.Services
                 Console.WriteLine(ex);
                 return ex.Message;
             }
+        }
+
+        //For update
+        public async Task<User> GetUserByIDAsync(int id)
+        {
+            return await _context.Users.FindAsync(id);
+        }
+
+        public async Task<bool> IsEmailExistAsync(string email)
+        {
+            return await _context.Users.AnyAsync(u => u.Email == email);
+        }
+
+        public async Task UpdateUserAsync(User user)
+        {
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+        }
+
+        // For Register User Employee
+        public async Task<bool> IsEmailExistingAsync(string email)
+        {
+            return await _context.Users.AnyAsync(u => u.Email == email);
+        }
+
+        public async Task<bool> IsValidDepartmentAsync(int departmentId)
+        {
+            return await _context.Departments.AnyAsync(d => d.DepartmentId == departmentId);
+        }
+
+        public async Task<int> GetUserEmployeeIDByEmailAsync(string email)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            return user?.UserId ?? 0;
+        }
+
+        public async Task AddUserAsync(User user)
+        {
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddUserEmployeeAsync(Employee employee)
+        {
+            _context.Employees.Add(employee);
+            await _context.SaveChangesAsync();
         }
     }
 }

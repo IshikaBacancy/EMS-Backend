@@ -98,6 +98,27 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "Employee_Management_System.Controllers.LeaveManagementController",
+    "Method": "UpdateLeaveStatus",
+    "RelativePath": "LeaveManagement/update-leave-status/{leaveId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "leaveId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "status",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "Employee_Management_System.Controllers.ReportsAnalyticsController",
     "Method": "GetAllEmployeesTimeSheetReportMonthlyAsync",
     "RelativePath": "ReportsAnalytics/GetAllEmployeesTimeSheetReportMonthly",
@@ -248,6 +269,22 @@
       {
         "Name": "UserEmployeeDto",
         "Type": "Employee_Management_System.DTOs.UserDTOs.UserEmployeeRegistrationDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Employee_Management_System.Controllers.UserController",
+    "Method": "UpdateUserAsync",
+    "RelativePath": "User/UpdateUser",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userDto",
+        "Type": "Employee_Management_System.DTOs.UserDTOs.UserUpdateDTO",
         "IsRequired": true
       }
     ],

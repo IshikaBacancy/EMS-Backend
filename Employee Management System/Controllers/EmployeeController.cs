@@ -58,11 +58,5 @@ namespace Employee_Management_System.Controllers
             }
             return Ok(employees);
         }
-
-
-
-
-
-
     }
 }

@@ -115,9 +115,5 @@ namespace Employee_Management_System.Repositories.Services
             await _context.SaveChangesAsync();
         }
 
-        
-
-
-
     }
 }

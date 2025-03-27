@@ -61,43 +61,28 @@ namespace Employee_Management_System.Controllers
             return Ok(leaves);
         }
 
-        //    [HttpPut("UpdateLeaveStatus")]
-        //    public async Task<IActionResult> UpdateLeaveStatus([FromBody] LeaveUpdateDTO leaveUpdateDTO)
-        //    {
-        //        var userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-        //        var employee = await _leaveManagementService.GetEmployeeByIdAsync(userId);
+        [Authorize(Roles = "Employee")]
+        [HttpPut("update-leave-status/{leaveId}")]
+        public async Task<IActionResult> UpdateLeaveStatus(int leaveId, [FromBody] string status)
+        {
+            try
+            {
+                bool updated = await _leaveManagementService.UpdateLeaveStatusAsync(leaveId, status);
 
-        //        if (employee == null)
-        //            return BadRequest(new { Message = result });
+                if (!updated)
+                    return NotFound(new { Message = "Leave request not found or could not be updated." });
 
-        //        var response = new
-        //        {
-        //            Message = result,
-        //            EmployeeDetails = new
-        //            {
-        //                employee.EmployeeId,
-        //                employee.FirstName,
-        //                employee.LastName,
-        //                employee.DepartmentName,
-        //                Leaves = employee.Leaves.Select(leave => new
-        //                {
-        //                    leave.StartDate,
-        //                    leave.EndDate,
-        //                    leave.LeaveType,
-        //                    leave.Status,
-        //                    leave.AppliedAt
-        //                }).ToList()
-        //            }
-        //        };
-
-        //        return Ok(response);
-
-
-
-
-
-
-        //    }
+                return Ok(new { Message = "Leave status updated successfully." });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "An error occurred while updating leave status.", Error = ex.Message });
+            }
+        }
     }
 }
 

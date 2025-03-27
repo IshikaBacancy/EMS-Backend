@@ -15,10 +15,9 @@ namespace Employee_Management_System.Repositories.Interfaces
         Task<bool> IsEmailExistsAsync(string email);
         Task AddUserAdminAsync(User user);
 
-        //Registration of AdminEmployee
-        Task AddUserEmployeeAsync(Employee employee);
-        
+       
 
+       
         Task<int> GetUserEmployeeIdByEmailAsync(string email);
 
         Task<string> ActivateUserEmployeeAsync(User user);
@@ -26,5 +25,28 @@ namespace Employee_Management_System.Repositories.Interfaces
         Task<string> DeactivateUserEmployeeAsync(User user);
         Task<User> GetUserByIdAsync(int id);
         //Task<string> DeactivateUserEmployeeAsync(int id);
+
+        //updates
+        Task<User> GetUserByIDAsync(int id);
+
+        Task<bool> IsEmailExistAsync(string email);
+
+        Task UpdateUserAsync(User user);
+
+        //Register User Employee Register
+        Task<bool> IsEmailExistingAsync(string email);
+
+        Task<bool> IsValidDepartmentAsync(int departmentId);
+
+        Task<int> GetUserEmployeeIDByEmailAsync(string email);
+
+        Task AddUserAsync(User user);
+        Task AddUserEmployeeAsync(Employee employee);
+
+
+
+
+
+
     }
 }

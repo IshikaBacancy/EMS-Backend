@@ -158,6 +158,48 @@
         }
       }
     },
+    "/LeaveManagement/update-leave-status/{leaveId}": {
+      "put": {
+        "tags": [
+          "LeaveManagement"
+        ],
+        "parameters": [
+          {
+            "name": "leaveId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/ReportsAnalytics/GetAllEmployeesTimeSheetReportWeekly": {
       "get": {
         "tags": [
@@ -343,6 +385,37 @@
             "application/*+json": {
               "schema": {
                 "$ref": "#/components/schemas/UserEmployeeRegistrationDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/User/UpdateUser": {
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdateDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdateDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdateDTO"
               }
             }
           }
@@ -688,6 +761,7 @@
       },
       "UserEmployeeRegistrationDTO": {
         "required": [
+          "departmentId",
           "email",
           "firstName",
           "lastName",
@@ -696,6 +770,10 @@
         ],
         "type": "object",
         "properties": {
+          "departmentId": {
+            "type": "integer",
+            "format": "int32"
+          },
           "firstName": {
             "maxLength": 100,
             "minLength": 0,
@@ -809,6 +887,45 @@
             "maxLength": 20,
             "minLength": 5,
             "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserUpdateDTO": {
+        "required": [
+          "email",
+          "firstName",
+          "lastName",
+          "phone",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "firstName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "lastName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "email": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "format": "email"
+          },
+          "phone": {
+            "maxLength": 15,
+            "minLength": 0,
+            "type": "string",
+            "format": "tel"
           }
         },
         "additionalProperties": false

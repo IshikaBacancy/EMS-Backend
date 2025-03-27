@@ -15,8 +15,5 @@ namespace Employee_Management_System.DTOs.ReportsAnalyticsDTOs
         [Column(TypeName = "decimal(5,2)")]
         public decimal TotalHours { get; set; }
 
-        
-
-
     }
 }

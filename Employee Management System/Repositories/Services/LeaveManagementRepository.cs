@@ -116,28 +116,30 @@ namespace Employee_Management_System.Repositories.Services
                 .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
         }
 
-        public async Task<bool> UpdateLeaveStatusAsync(int employeeId, string status)
+        public async Task<bool> UpdateLeaveStatusAsync(int leaveId, string status)
         {
-            var employee = await _context.Employees
-                .Include(e => e.Leaves)
-                .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
-
-            if (employee == null)
+            try
             {
+                var leave = await _context.Leaves.FindAsync(leaveId);
+                if (leave == null)
+                    return false;
+
+                leave.Status = status;
+                _context.Leaves.Update(leave);
+                return await _context.SaveChangesAsync() > 0;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
                 return false;
             }
-            foreach (var leave in employee.Leaves)
-            {
-                leave.Status = status;
-            }
-
-            _context.Employees.Update(employee);
-            return await _context.SaveChangesAsync() > 0;
-
-
-
-
         }
-    }
 
+
+
+
+    }
 }
+
+
