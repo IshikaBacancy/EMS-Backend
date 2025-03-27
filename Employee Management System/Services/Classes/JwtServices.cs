@@ -12,11 +12,15 @@ namespace Employee_Management_System.Services.Classes
     {
         private readonly IConfiguration _configuration;
         private readonly DataContext _dataContext;
+        private readonly string _secretKey;
+        private readonly int _expiryMinutes;
 
         public JwtServices(IConfiguration configuration, DataContext dataContext)
         {
             _configuration = configuration;
             _dataContext = dataContext;
+            _secretKey = configuration["Jwt:Secret"];
+            _expiryMinutes = Convert.ToInt32(configuration["Jwt:ExpiryMinutes"]);
         }
 
         public async Task <string> GenerateAccessToken(User user)
@@ -55,6 +59,51 @@ namespace Employee_Management_System.Services.Classes
 
             return tokenString;
         }
+
+        public string GenerateResetPasswordToken(int userId)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_secretKey);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+                    new Claim("Purpose", "ResetPassword")
+                }),
+                Expires = DateTime.UtcNow.AddMinutes(15),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
+
+        public ClaimsPrincipal ValidateResetPasswordToken(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_secretKey);
+
+            try
+            {
+                var claimsPrincipal = tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateLifetime = true
+                }, out SecurityToken validatedToken);
+
+                return claimsPrincipal;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
 
     }
 }

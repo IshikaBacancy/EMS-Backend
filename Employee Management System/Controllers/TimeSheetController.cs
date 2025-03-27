@@ -71,5 +71,26 @@ namespace Employee_Management_System.Controllers
             }
             return Ok(response);
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("ExportTimesheets")]
+        public async Task<IActionResult> ExportTimesheets()
+        {
+            try
+            {
+                var fileBytes = await _timesheetService.ExportTimesheetsToExcelAsync();
+
+                if (fileBytes == null || fileBytes.Length == 0)
+                {
+                    return NotFound("No timesheet data available for export.");
+                }
+
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Timesheets.xlsx");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while exporting timesheets: {ex.Message}");
+            }
+        }
     }
 }

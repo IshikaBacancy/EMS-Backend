@@ -14,5 +14,9 @@ namespace Employee_Management_System.DTOs.ReportsAnalyticsDTOs
         [Required(ErrorMessage = "Total hours are required.")]
         [Column(TypeName = "decimal(5,2)")]
         public decimal TotalHours { get; set; }
+
+        
+
+
     }
 }

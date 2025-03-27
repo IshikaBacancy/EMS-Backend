@@ -5,9 +5,9 @@ namespace Employee_Management_System.DTOs.UserDTOs
 {
     public class UserEmployeeRegistrationDTO
     {
-        [Required(ErrorMessage = "Department Id is required.")]
-        [ForeignKey("Department")]
-        public int DepartmentId { get; set; }
+        //[Required(ErrorMessage = "Department Id is required.")]
+        //[ForeignKey("Department")]
+        //public int DepartmentId { get; set; }
 
         [Required(ErrorMessage = "First name is required.")]
         [StringLength(100, ErrorMessage = "First name cannot exceed 100 characters.")]

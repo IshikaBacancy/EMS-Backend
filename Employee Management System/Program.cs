@@ -7,6 +7,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication;
+using Employee_Management_System.Repositories.Interfaces;
+using Employee_Management_System.Repositories.Services;
 
 
 
@@ -23,6 +25,15 @@ builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+//Registering the repositories
+builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IReportsAnalyticsRepository, ReportsAnalyticsRepository>();
+builder.Services.AddScoped<ILeaveManagementRepository, LeaveManagementRepository>();
+builder.Services.AddScoped<ITimeSheetRepository, TimeSheetRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 
 //Registering the service
 builder.Services.AddScoped<IUserService, UserService>();

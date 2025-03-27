@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Employee_Management_System.Models;
 using System.Security.Cryptography;
 using System.Text;
+using Employee_Management_System.Repositories.Interfaces;
+using Employee_Management_System.Repositories.Services;
 
 
 
@@ -13,32 +15,32 @@ namespace Employee_Management_System.Services.Classes
 {
     public class UserService : IUserService
     {
-        private readonly DataContext _context;
+        private readonly IUserRepository _userRepository;
 
-        public UserService(DataContext context)
+        public UserService(IUserRepository userRepository)
         {
-            _context = context;
+            _userRepository = userRepository;
         }
 
         public async Task<List<UserResponseDTO>> GetAllUsersAsync()
         {
             try
             {
-                var users = await _context.Users
-                    .Select(a => new UserResponseDTO
-                    {
-                        UserId = a.UserId,
-                        FirstName = a.FirstName,
-                        LastName = a.LastName,
-                        Email = a.Email,
-                        Phone = a.Phone,
-                        RoleName = a.Role.RoleName,
-                        IsActive = a.IsActive,
-                    })
-                    .AsNoTracking()
-                    .ToListAsync();
+                //var users = await _context.Users
+                //    .Select(a => new UserResponseDTO
+                //    {
+                //        UserId = a.UserId,
+                //        FirstName = a.FirstName,
+                //        LastName = a.LastName,
+                //        Email = a.Email,
+                //        Phone = a.Phone,
+                //        RoleName = a.Role.RoleName,
+                //        IsActive = a.IsActive,
+                //    })
+                //    .AsNoTracking()
+                //    .ToListAsync();
 
-                return users;
+                return await _userRepository.GetAllUsersAsync();
             }
             catch (Exception ex)
             {
@@ -59,9 +61,9 @@ namespace Employee_Management_System.Services.Classes
 
                 }
 
-                if (await _context.Users.AnyAsync(u => u.Email == UserAdminDto.Email))
+                if (await _userRepository.IsEmailExistsAsync(UserAdminDto.Email))
                 {
-                    throw new Exception("This Email Address already exists. Please enter a valid Email Address.");
+                    return "This Email Address already exists. Please enter a valid Email Address.";
                 }
 
                 var sha256 = SHA256.Create();
@@ -77,9 +79,7 @@ namespace Employee_Management_System.Services.Classes
                 };
 
 
-                await _context.Users.AddAsync(UserAdmin);
-                await _context.SaveChangesAsync();
-
+                await _userRepository.AddUserAdminAsync(UserAdmin);
                 return "User Admin Registered Successfully";
             }
             catch (Exception ex)
@@ -98,20 +98,19 @@ namespace Employee_Management_System.Services.Classes
                     throw new Exception("Please enter the valid User Employees Details.");
                 }
 
-                if (await _context.Users.AnyAsync(u => u.Email == UserEmployeeDto.Email))
+                if (await _userRepository.IsEmailExistsAsync(UserEmployeeDto.Email))
                 {
-                    throw new Exception("This Email Address already exists. Please enter a valid Email Address.");
+                    return "This Email Address already exists. Please enter a valid Email Address.";
                 }
 
-                if (await _context.Departments.AllAsync(d => d.DepartmentId != UserEmployeeDto.DepartmentId))
-                {
-                    throw new Exception("Please enter a valid DepartmentID:");
-                }
+               
+
+
 
                 var sha256 = SHA256.Create();
                 byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(UserEmployeeDto.Password));
 
-                var userEmployee = new User
+                var UserEmployee = new User
                 {
                     FirstName = UserEmployeeDto.FirstName,
                     LastName = UserEmployeeDto.LastName,
@@ -121,79 +120,80 @@ namespace Employee_Management_System.Services.Classes
                     RoleId = 2,
                 };
 
-                await _context.Users.AddAsync(userEmployee);
-                await _context.SaveChangesAsync();
+                
 
-                var userEmployeeId = await _context.Users
-                    .Where(ue => ue.Email == UserEmployeeDto.Email)
-                    .Select(ue => ue.UserId).SingleOrDefaultAsync();
+                int userId = await _userRepository.GetUserEmployeeIdByEmailAsync(UserEmployeeDto.Email);
+                Console.WriteLine($"Fetched User ID: {userId}");
 
-                if (userEmployeeId == 0)
-                {
-                    throw new Exception("Error in Employee Registration");
-                }
+              
 
                 var employee = new Employee
                 {
-                    UserId = userEmployeeId,
-                    DepartmentId = UserEmployeeDto.DepartmentId,
+                    UserId = userId,
+                   
                 };
 
-                await _context.Employees.AddAsync(employee);
-                await _context.SaveChangesAsync();
+                await _userRepository.AddUserEmployeeAsync(employee);
 
-                return $"User Employee Registered Successfully";
+                if (userId == 0)
+                {
+                    return "Error in Employee Registration";
+                }
+
+                return "User Employee Registered Successfully";
+
+
+
+
             }
             catch (Exception ex)
             {
-                return ex.Message ;
-            }
-        }
-
-        public async Task<string> UpdateUserAsync(UserUpdateDTO userDto)
-        {
-            try
-            {
-                if (userDto == null)
-                {
-                    throw new Exception("Please enter the valid User Object");
-                }
-
-                var user = await _context.Users.FindAsync(userDto.UserId);
-
-                if (user == null)
-                {
-                    throw new Exception("User not found..");
-                }
-
-                if (user.Email != userDto.Email && await _context.Users.AnyAsync(u => u.Email == userDto.Email))
-                {
-                    throw new Exception("Email Mismatch. The email address is already in use..");
-                }
-
-                user.FirstName = userDto.FirstName;
-                user.LastName = userDto.LastName;
-                user.Email = userDto.Email;
-                user.Phone = userDto.Phone;
-                user.UpdatedAt = DateTime.UtcNow;
-
-                await _context.SaveChangesAsync();
-                return "User Details Updated Successfully";
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
                 return ex.Message;
             }
         }
+
+        ////public async Task<string> UpdateUserAsync(UserUpdateDTO userDto)
+        ////{
+        ////    try
+        ////    {
+        ////        if (userDto == null)
+        ////        {
+        ////            throw new Exception("Please enter the valid User Object");
+        ////        }
+
+        ////        var user = await _context.Users.FindAsync(userDto.UserId);
+
+        ////        if (user == null)
+        ////        {
+        ////            throw new Exception("User not found..");
+        ////        }
+
+        ////        if (user.Email != userDto.Email && await _context.Users.AnyAsync(u => u.Email == userDto.Email))
+        ////        {
+        ////            throw new Exception("Email Mismatch. The email address is already in use..");
+        ////        }
+
+        ////        user.FirstName = userDto.FirstName;
+        ////        user.LastName = userDto.LastName;
+        ////        user.Email = userDto.Email;
+        ////        user.Phone = userDto.Phone;
+        ////        user.UpdatedAt = DateTime.UtcNow;
+
+        ////        await _context.SaveChangesAsync();
+        ////        return "User Details Updated Successfully";
+        ////    }
+        ////    catch (Exception ex)
+        ////    {
+        ////        Console.WriteLine(ex);
+        ////        return ex.Message;
+        ////    }
+        //}
 
         public async Task<string> ActivateUserEmployeeAsync(int id)
         {
             try
             {
-                var user = await _context.Users
-                    .Where(u => u.UserId == id && u.RoleId != 1)
-                    .SingleOrDefaultAsync();
+               var user = await _userRepository.GetUserByIdAsync(id);
 
                 if (user == null)
                 {
@@ -202,16 +202,17 @@ namespace Employee_Management_System.Services.Classes
 
                 if (!user.IsActive)
                 {
-                    user.IsActive = true;
+                    await _userRepository.ActivateUserEmployeeAsync(user);
+                    return "User Employee Activated Successfully.";
                 }
                 else
                 {
-                    return("User Employee is already in Activated mode");
+                    return ("User Employee is already in Activated mode");
                 }
 
-                await _context.SaveChangesAsync();
+               
 
-                return $"User Employee Activated Successfully";
+               
             }
             catch (Exception ex)
             {
@@ -224,9 +225,7 @@ namespace Employee_Management_System.Services.Classes
         {
             try
             {
-                var user = await _context.Users
-                    .Where(u => u.UserId == id && u.RoleId != 1)
-                    .SingleOrDefaultAsync();
+                var user = await _userRepository.GetUserByIdAsync(id);
 
                 if (user == null)
                 {
@@ -235,16 +234,15 @@ namespace Employee_Management_System.Services.Classes
 
                 if (user.IsActive)
                 {
-                    user.IsActive = false;
+                    await _userRepository.DeactivateUserEmployeeAsync(user);
+                    return "User Employee Deactivated Successfully.";
                 }
                 else
                 {
-                    return($"User Employee is already in Deactivated mode");
+                    return ($"User Employee is already in Deactivated mode");
                 }
 
-                await _context.SaveChangesAsync();
-
-                return $"User Employee Deactivated Successfully";
+                
             }
             catch (Exception ex)
             {

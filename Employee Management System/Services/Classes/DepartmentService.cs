@@ -1,6 +1,8 @@
 ﻿using Employee_Management_System.Data;
 using Employee_Management_System.DTOs.DepartmentDTOs;
+using Employee_Management_System.DTOs.EmployeeDTOs;
 using Employee_Management_System.Models;
+using Employee_Management_System.Repositories.Interfaces;
 using Employee_Management_System.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,37 +10,33 @@ namespace Employee_Management_System.Services.Classes
 {
     public class DepartmentService : IDepartmentService
     {
-        private readonly DataContext _context;
+        private readonly IDepartmentRepository _departmentRepository;
 
-        public DepartmentService(DataContext context)
+        public DepartmentService(IDepartmentRepository departmentRepository)
         {
-            _context = context;
+            _departmentRepository = departmentRepository;
         }
+
 
         public async Task<List<DepartmentResponseDTO>> GetAllDepartmentsAsync()
         {
             try
             {
-                var departments = await _context.Departments
-                    .Select(d => new DepartmentResponseDTO
-                    {
-                        DepartmentId = d.DepartmentId,
-                        DepartmentName = d.DepartmentName,
-                    })
-                    .OrderBy(d => d.DepartmentId)
-                    .AsNoTracking()
-                    .ToListAsync();
+                var departments = await _departmentRepository.GetAllDepartmentsAsync();
+
+                if(departments == null || !departments.Any()) 
+                {
+                    throw new Exception("Please enter valid departments details!");
+                }
 
                 return departments;
-
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                return null;
+                Console.WriteLine($"Error in fetching departments:{ex.Message}");
+                return new List<DepartmentResponseDTO>();
             }
         }
-
         public async Task<string> RegisterDepartmentAsync(DepartmentRegistrationDTO departmentDto)
         {
             try
@@ -48,7 +46,7 @@ namespace Employee_Management_System.Services.Classes
                     throw new Exception("Please enter the valid Department Details");
                 }
 
-                var DepartmentExist = await _context.Departments.SingleOrDefaultAsync(d => d.DepartmentName == departmentDto.DepartmentName);
+                var DepartmentExist = await _departmentRepository.GetDepartmentByNameAsync(departmentDto.DepartmentName);
                 if (DepartmentExist != null)
                 {
                     throw new Exception("Department already exists");
@@ -59,15 +57,15 @@ namespace Employee_Management_System.Services.Classes
                     DepartmentName = departmentDto.DepartmentName
                 };
 
-                await _context.Departments.AddAsync(department);
-                await _context.SaveChangesAsync();
-
-                return "Department Added Successfully";
+                return await _departmentRepository.RegisterDepartmentAsync(department);
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                Console.WriteLine(ex.Message);
+                return "Error occurred during registering the department";
             }
+
+            
         }
     }
 

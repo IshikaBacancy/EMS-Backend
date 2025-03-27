@@ -268,6 +268,18 @@
         }
       }
     },
+    "/TimeSheet/ExportTimesheets": {
+      "get": {
+        "tags": [
+          "TimeSheet"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/User/GetAllUsers": {
       "get": {
         "tags": [
@@ -342,37 +354,6 @@
         }
       }
     },
-    "/User/UpdateUser": {
-      "put": {
-        "tags": [
-          "User"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserUpdateDTO"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserUpdateDTO"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserUpdateDTO"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/User/ActivateUserEmployee": {
       "put": {
         "tags": [
@@ -396,7 +377,7 @@
       }
     },
     "/User/DeactivateUserEmployee": {
-      "delete": {
+      "put": {
         "tags": [
           "User"
         ],
@@ -477,43 +458,64 @@
             "description": "OK"
           }
         }
-      }
-    },
-    "/WeatherForecast": {
-      "get": {
+      },
+      "post": {
         "tags": [
-          "WeatherForecast"
+          "UserAuthentication"
         ],
-        "operationId": "GetWeatherForecast",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/WeatherForecast"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/WeatherForecast"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/WeatherForecast"
-                  }
-                }
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDTO"
               }
             }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/UserAuthentication/RequestResetPassword": {
+      "post": {
+        "tags": [
+          "UserAuthentication"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequestDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequestDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -589,6 +591,43 @@
         },
         "additionalProperties": false
       },
+      "ResetPasswordDTO": {
+        "required": [
+          "confirmPassword",
+          "newPassword"
+        ],
+        "type": "object",
+        "properties": {
+          "newPassword": {
+            "maxLength": 20,
+            "minLength": 5,
+            "type": "string"
+          },
+          "confirmPassword": {
+            "maxLength": 20,
+            "minLength": 5,
+            "type": "string"
+          },
+          "token": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResetPasswordRequestDTO": {
+        "required": [
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
       "TimeSheetRegistrationDTO": {
         "required": [
           "date",
@@ -649,7 +688,6 @@
       },
       "UserEmployeeRegistrationDTO": {
         "required": [
-          "departmentId",
           "email",
           "firstName",
           "lastName",
@@ -658,10 +696,6 @@
         ],
         "type": "object",
         "properties": {
-          "departmentId": {
-            "type": "integer",
-            "format": "int32"
-          },
           "firstName": {
             "maxLength": 100,
             "minLength": 0,
@@ -775,68 +809,6 @@
             "maxLength": 20,
             "minLength": 5,
             "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "UserUpdateDTO": {
-        "required": [
-          "email",
-          "firstName",
-          "lastName",
-          "phone",
-          "userId"
-        ],
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "firstName": {
-            "maxLength": 100,
-            "minLength": 0,
-            "type": "string"
-          },
-          "lastName": {
-            "maxLength": 100,
-            "minLength": 0,
-            "type": "string"
-          },
-          "email": {
-            "maxLength": 255,
-            "minLength": 0,
-            "type": "string",
-            "format": "email"
-          },
-          "phone": {
-            "maxLength": 15,
-            "minLength": 0,
-            "type": "string",
-            "format": "tel"
-          }
-        },
-        "additionalProperties": false
-      },
-      "WeatherForecast": {
-        "type": "object",
-        "properties": {
-          "date": {
-            "type": "string",
-            "format": "date"
-          },
-          "temperatureC": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "temperatureF": {
-            "type": "integer",
-            "format": "int32",
-            "readOnly": true
-          },
-          "summary": {
-            "type": "string",
-            "nullable": true
           }
         },
         "additionalProperties": false

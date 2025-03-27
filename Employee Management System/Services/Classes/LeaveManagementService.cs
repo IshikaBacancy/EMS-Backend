@@ -2,6 +2,8 @@
 using Employee_Management_System.DTOs.LeaveManagementDTOs;
 using Employee_Management_System.DTOs.TimesheetDTOs;
 using Employee_Management_System.Models;
+using Employee_Management_System.Repositories.Interfaces;
+using Employee_Management_System.Repositories.Services;
 using Employee_Management_System.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,12 +11,15 @@ namespace Employee_Management_System.Services.Classes
 {
     public class LeaveManagementService : ILeaveManagementService
     {
-        private readonly DataContext _context;
+        private readonly ILeaveManagementRepository _leaveManagementRepository;
+        private readonly IEmployeeRepository _employeeRepository;
 
-        public LeaveManagementService(DataContext context)
+        public LeaveManagementService(ILeaveManagementRepository leaveManagementRepository, IEmployeeRepository employeeRepository)
         {
-            _context = context;
+            _leaveManagementRepository = leaveManagementRepository;
+            _employeeRepository = employeeRepository;
         }
+
         public async Task<string> RegisterLeaveAsync(LeaveRegistrationDTO leaveRegistrationDTO, int id)
         {
             try
@@ -24,14 +29,22 @@ namespace Employee_Management_System.Services.Classes
                     throw new Exception("Please enter a valid Leave Application Object!..");
                 }
 
+                
+
                 if (leaveRegistrationDTO.StartDate > leaveRegistrationDTO.EndDate)
                 {
                     throw new Exception("Start Date should be before than End Date!..");
                 }
 
-                var employee = await _context.Employees.SingleOrDefaultAsync(e => e.UserId == id);
+               
+                var employee = await _employeeRepository.GetEmployeeByIdAsync(id);
+                if (employee == null)
+                {
+                    throw new Exception("Employee Not Found!");
+                }
 
-                var leaves = new Leave
+               
+                var leave = new Leave
                 {
                     EmployeeId = employee.EmployeeId,
                     StartDate = leaveRegistrationDTO.StartDate,
@@ -39,10 +52,7 @@ namespace Employee_Management_System.Services.Classes
                     LeaveType = leaveRegistrationDTO.LeaveType,
                     Reason = leaveRegistrationDTO.Reason,
                 };
-                await _context.Leaves.AddAsync(leaves);
-                await _context.SaveChangesAsync();
-
-                return "Leave Application Registered Successfully";
+                return await _leaveManagementRepository.RegisterLeaveAsync(leave);
             }
             catch (Exception ex)
             {
@@ -56,30 +66,9 @@ namespace Employee_Management_System.Services.Classes
         {
             try
             {
-                var leaves = await _context.Employees
-                    .Include(e => e.Department)
-                    .Include(e => e.User)
-                    .Include(e => e.Leaves)
-                    .Select(lr => new LeaveResponseDTO
-                    {
-                        EmployeeId = lr.EmployeeId,
-                        FirstName = lr.User.FirstName,
-                        LastName = lr.User.LastName,
-                        DepartmentName = lr.Department.DepartmentName,
-                        LeaveSheetDetails = lr.Leaves
-                        .Select(leave => new LeaveSheetDetailsDTO
-                        {
-                           StartDate = leave.StartDate,
-                           EndDate = leave.EndDate,
-                           LeaveType = leave.LeaveType,
-                           Reason= leave.Reason,
-                           Status = leave.Status,
-                           AppliedAt = leave.AppliedAt,
-                            
-                        }).ToList()
-                    }).ToListAsync();
+               
 
-                return leaves;
+                return await _leaveManagementRepository.GetLeaveAllEmployeesAsync();
             }
             catch (Exception ex)
             {
@@ -97,32 +86,32 @@ namespace Employee_Management_System.Services.Classes
         {
             try
             {
-                var employee = await _context.Employees.SingleOrDefaultAsync(e => e.UserId == id);
+                //var employee = await _context.Employees.SingleOrDefaultAsync(e => e.UserId == id);
 
-                var leavesApplication = await _context.Employees
-                    .Include(e => e.Department)
-                    .Include(e => e.User)
-                    .Include(e => e.timesheets)
-                    .Where(e => e.EmployeeId == employee.EmployeeId)
-                    .Select(lr => new LeaveResponseDTO
-                    {
-                        EmployeeId = lr.EmployeeId,
-                        FirstName = lr.User.FirstName,
-                        LastName = lr.User.LastName,
-                        DepartmentName = lr.Department.DepartmentName,
-                        LeaveSheetDetails = lr.Leaves.Select(leave => new LeaveSheetDetailsDTO
-                        {
-                            StartDate = leave.StartDate,
-                            EndDate = leave.EndDate,
-                            LeaveType = leave.LeaveType,
-                            Reason = leave.Reason,
-                            Status = leave.Status,
-                            AppliedAt = leave.AppliedAt,
-                        })
-                        .ToList()
-                    }
-                    ).ToListAsync();
-                return leavesApplication;
+                //var leavesApplication = await _context.Employees
+                //    .Include(e => e.Department)
+                //    .Include(e => e.User)
+                //    .Include(e => e.timesheets)
+                //    .Where(e => e.EmployeeId == employee.EmployeeId)
+                //    .Select(lr => new LeaveResponseDTO
+                //    {
+                //        EmployeeId = lr.EmployeeId,
+                //        FirstName = lr.User.FirstName,
+                //        LastName = lr.User.LastName,
+                //        DepartmentName = lr.Department.DepartmentName,
+                //        LeaveSheetDetails = lr.Leaves.Select(leave => new LeaveSheetDetailsDTO
+                //        {
+                //            StartDate = leave.StartDate,
+                //            EndDate = leave.EndDate,
+                //            LeaveType = leave.LeaveType,
+                //            Reason = leave.Reason,
+                //            Status = leave.Status,
+                //            AppliedAt = leave.AppliedAt,
+                //        })
+                //        .ToList()
+                //    }
+                //    ).ToListAsync();
+                return await _leaveManagementRepository.GetLeavesByIdAsync(id);
 
 
 
@@ -140,9 +129,15 @@ namespace Employee_Management_System.Services.Classes
         //{
         //    try
         //    {
-        //        if (updateLeaveDTO == null)
+        //        if (updateLeaveDTO == null || updateLeaveDTO.LeaveSheetDetails == null || !updateLeaveDTO.LeaveSheetDetails.Any())
         //        {
         //            throw new Exception("Please enter the valid update Timesheet Details");
+        //        }
+
+        //        var employee = await _employeeRepository.GetEmployeeByIdAsync(id);
+        //        if (employee == null)
+        //        {
+        //            throw new Exception("Employee not found.");
         //        }
 
         //        if (updateLeaveDTO.StartDate > updateLeaveDTO.EndDate)
@@ -165,11 +160,11 @@ namespace Employee_Management_System.Services.Classes
         //            throw new Exception("Enter valid TimeSheetId to Update!..");
         //        }
 
-        //        timeSheet.Date = timeSheetDto.Date;
-        //        timeSheet.StartTime = timeSheetDto.StartTime;
-        //        timeSheet.EndTime = timeSheetDto.EndTime;
-        //        timeSheet.TotalHours = Convert.ToDecimal((timeSheetDto.EndTime - timeSheetDto.StartTime).TotalHours);
-        //        timeSheet.Description = timeSheetDto.Description;
+        //        timeSheet.Date = updateLeaveDTO.StartDate;
+        //        timeSheet.StartTime = updateLeaveDTO.StartTime;
+        //        timeSheet.EndTime = updateLeaveDTO.EndTime;
+        //        timeSheet.TotalHours = Convert.ToDecimal((updateLeaveDTO.EndTime - updateLeaveDTO.StartTime).TotalHours);
+        //        timeSheet.Description = updateLeaveDTO.Description;
 
         //        await _context.SaveChangesAsync();
 
@@ -180,7 +175,28 @@ namespace Employee_Management_System.Services.Classes
         //        return ex.Message;
         //    }
         //}
-     
+
+        //public async Task<(string, Employee)> UpdateLeaveStatusAsync(LeaveUpdateDTO leaveUpdateDTO, LeaveUpdateDTO.Status, int id)
+        //{
+        //    // Fetch employee details using EmployeeId
+        //    var employee = await _employeeRepository.GetEmployeeByIdAsync(id);
+        //    if (employee == null)
+        //    {
+        //        return ("Employee not found!", null);
+        //    }
+
+        //    // Update Leave Status for all leave records
+        //    var isUpdated = await _leaveManagementRepository.UpdateLeaveStatusAsync(employee.EmployeeId, leaveUpdateDTO.Status, id);
+
+        //    return isUpdated ? ("Leave status updated successfully.", employee) : ("Failed to update leave status.", null);
+
+        //}
+
+
+
+
+
+
 
 
 

@@ -26,7 +26,7 @@ namespace Employee_Management_System.Controllers
 
             if (employees == null)
             {
-                return BadRequest("no Employees Found!");
+                return BadRequest("No Employees Found!");
             }
             return Ok(employees);
         }
@@ -54,7 +54,7 @@ namespace Employee_Management_System.Controllers
 
             if (employees == null)
             {
-                return BadRequest("NO EMPLOYEE FOUND");
+                return BadRequest("No Employees Found!");
             }
             return Ok(employees);
         }

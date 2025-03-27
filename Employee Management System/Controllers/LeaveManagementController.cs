@@ -56,16 +56,48 @@ namespace Employee_Management_System.Controllers
 
             if (leaves == null)
             {
-                return NotFound("No TimeSheet Found");
+                return NotFound("No Leaves Found");
             }
             return Ok(leaves);
         }
 
+        //    [HttpPut("UpdateLeaveStatus")]
+        //    public async Task<IActionResult> UpdateLeaveStatus([FromBody] LeaveUpdateDTO leaveUpdateDTO)
+        //    {
+        //        var userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        //        var employee = await _leaveManagementService.GetEmployeeByIdAsync(userId);
+
+        //        if (employee == null)
+        //            return BadRequest(new { Message = result });
+
+        //        var response = new
+        //        {
+        //            Message = result,
+        //            EmployeeDetails = new
+        //            {
+        //                employee.EmployeeId,
+        //                employee.FirstName,
+        //                employee.LastName,
+        //                employee.DepartmentName,
+        //                Leaves = employee.Leaves.Select(leave => new
+        //                {
+        //                    leave.StartDate,
+        //                    leave.EndDate,
+        //                    leave.LeaveType,
+        //                    leave.Status,
+        //                    leave.AppliedAt
+        //                }).ToList()
+        //            }
+        //        };
+
+        //        return Ok(response);
 
 
 
 
 
+
+        //    }
     }
 }
 

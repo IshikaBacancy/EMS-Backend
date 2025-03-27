@@ -34,14 +34,15 @@ namespace Employee_Management_System.Controllers
         public async Task<IActionResult> RegistrationUserAdminAsync(UserRegistrationAdminDTO UserAdminDto)
         {
             var response = await _userServices.RegistrationUserAdminAsync(UserAdminDto);
-            if (response == null) {
+            if (response == null)
+            {
 
                 return BadRequest(response);
             }
             return Ok(response);
         }
 
-        [HttpPost("RegistrationUserEmployee")]
+        [HttpPost("RegistrationUserEmployee")]  
 
         public async Task<IActionResult> RegistrationUserEmployeeAsync(UserEmployeeRegistrationDTO UserEmployeeDto)
 
@@ -56,19 +57,19 @@ namespace Employee_Management_System.Controllers
             return Ok(response);
         }
 
-        [HttpPut("UpdateUser")]
-        public async Task<IActionResult> UpdateUserAsync([FromBody] UserUpdateDTO userDto)
-        {
-            var response = await _userServices.UpdateUserAsync(userDto);
+        //[HttpPut("UpdateUser")]
+        //public async Task<IActionResult> UpdateUserAsync([FromBody] UserUpdateDTO userDto)
+        //{
+        //    var response = await _userServices.UpdateUserAsync(userDto);
 
-            var user = "User Details Updated Successfully";
+        //    var user = "User Details Updated Successfully";
 
-            if (response != $"user")
-            {
-                return BadRequest(response);
-            }
-            return Ok(response);
-        }
+        //    if (response != $"user")
+        //    {
+        //        return BadRequest(response);
+        //    }
+        //    return Ok(response);
+        //}
 
         [HttpPut("ActivateUserEmployee")]
         public async Task<IActionResult> ActivateUserEmployeeAsync(int id)
@@ -84,7 +85,7 @@ namespace Employee_Management_System.Controllers
             return Ok(response);
         }
 
-        [HttpDelete("DeactivateUserEmployee")]
+        [HttpPut("DeactivateUserEmployee")]
         public async Task<IActionResult> DeactivateUserEmployeeAsync(int id)
         {
             var response = await _userServices.DeactivateUserEmployeeAsync(id);

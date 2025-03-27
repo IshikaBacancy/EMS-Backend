@@ -9,6 +9,11 @@ namespace Employee_Management_System.Services.Interfaces
         Task<List<TimeSheetResponseDTO>> GetTimeSheetsByIdAsync(int id);
 
         Task<string> RegisterTimeSheetAsync(TimeSheetRegistrationDTO timeSheetDto, int id);
+
         Task<string> UpdateTimeSheetAsync(TimeSheetUpdateDTO timeSheetDto, int id);
+
+        Task<byte[]> ExportTimesheetsToExcelAsync();
+
+
     }
 }
