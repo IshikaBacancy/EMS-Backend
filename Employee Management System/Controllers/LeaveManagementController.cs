@@ -61,7 +61,7 @@ namespace Employee_Management_System.Controllers
             return Ok(leaves);
         }
 
-        [Authorize(Roles = "Employee")]
+        [Authorize(Roles = "Admin")]
         [HttpPut("update-leave-status/{leaveId}")]
         public async Task<IActionResult> UpdateLeaveStatus(int leaveId, [FromBody] string status)
         {
