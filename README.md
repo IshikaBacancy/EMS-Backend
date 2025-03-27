@@ -77,7 +77,7 @@ The Employee Management System (EMS) is a web-based application developed using 
 ## Setup Instructions 
 1. Clone the repository:  
    sh
-   git clone 
+   git clone https://github.com/IshikaBacancy/EMS-Backend.git
 2. Navigate to the project directory:  
    sh
    cd EMS--Backend-REST-API
@@ -97,7 +97,14 @@ The Employee Management System (EMS) is a web-based application developed using 
    
 7. Access Swagger UI at:  
    
-    https://localhost:7155/swagger/index.html
+    (https://localhost:7256/swagger/index.html)
+
+## Conclusion
+
+This API serves as the backbone of an Employee Management System (EMS), providing essential features for managing employees, departments, leave requests, timesheets, and user authentication. With a well-structured and secure design, it helps streamline operations and improves efficiency.  
+
+
+
 
 
 
